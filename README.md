@@ -131,9 +131,3 @@ See *[Available commands](#Available-commands)* below and try it out on https://
   * #seq [instrument] [notes]
 * Replace samples
   * i.e. #snare A, #snare B, etc.
-* Change key
-  * #key - Transposes tonal instruments to a given key
-  * #?key - Retrieves current key
-* Random note
-  * #piano random
-    * parseNotes - if (‘random’), pick random note - no need to call notesToMidi
