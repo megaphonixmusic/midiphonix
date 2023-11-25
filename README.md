@@ -46,13 +46,14 @@ See *[Available commands](#Available-commands)* below and try it out on https://
   * Triggers the crash cymbal
 
 ### Instruments
+
 * **#piano** [note] [...] [duration]
-  * Plays specified note(s) on the piano for a specified duration (in seconds).
+  * Plays specified note(s) on the piano for a specified duration (in seconds)
   * Options not required, default is C4 (middle C) for 1 second
-  * Notes must be in familiar name (c5, D#4, A6, etc.)
+  * Notes can be in familiar name (c5, D#4, A6, etc.) **OR** simply type “random” for a surprise
     * Chords are supported - just type each note with a space:
-      * #piano c4 e4 g4 5
-      * This plays C, E, G chord for 5 seconds
+      * #piano c4 e4 g4 random 5
+      * This plays C, E, G, [randomnote] chord for 5 seconds
 * **#bass** [note] [duration]
   * Plays a note on the bass synth, as above
 * **#pad** [note] [duration]
@@ -67,7 +68,7 @@ See *[Available commands](#Available-commands)* below and try it out on https://
   * Transition time range: 1-30 seconds
   * Examples:
     * #cutoff 40 3
-      * Adjusts the cutoff amount to 40% over 3 seconds.
+      * Adjusts the cutoff amount to 40% over 3 seconds
     * #cutoff 30
       * Sets cutoff amount to 30% immediately
 * **#reverb** [amount] [transition time]
@@ -80,7 +81,7 @@ See *[Available commands](#Available-commands)* below and try it out on https://
   * Sets the Master channel phaser amount
   * Same as above examples
 * **#?[command]**
-  * Lists current command value in chat.
+  * Lists current command value in chat
   * Example:
     * #?cutoff -> “Current #cutoff value: 100”
     * #?tempo -> “Current tempo: 120”
@@ -99,10 +100,14 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 
 ### Other
 * **#tempo** [value] / **#bpm** [value]
-  * Set the tempo to a certain BPM (beats per minute).
+  * Set the tempo to a certain BPM (beats per minute)
   * Cooldown: 20 seconds (to let people feel a vibe for a bit…)
+* **#key** [value]
+  * Changes the project key by [value] semitones
+  * Range is -12 to +12
+  * For original key/pitch: #key 0
 * **#mute** [channel] / drums / instruments
-  * Mutes a specific channel (kick, piano, etc.) OR responds to ‘drum’ and ‘instrument’ groups.
+  * Mutes a specific channel (kick, piano, etc.) OR responds to ‘drum’ and ‘instrument’ groups
   * Examples:
     * #mute kick
     * #mute instruments
