@@ -116,6 +116,7 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 * Playing infinite notes (on/off messages)
 * “Performance Mode” functionality
   * #buildup - Endless Smile trigger 4-bar
+  * This will be tricky, since drum commands are currently tied to Note#s, which are nullified when Performance mode is active (since it uses Note#s for Playlist "pads").
 * Drum loop messages
   * #kick1
   * #snare1
