@@ -24,10 +24,10 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 ## FYI
 
 * ***MIDIphonix is a work-in-progress, so it may be buggy and is not fully feature-complete. See [To-do](#To-do) for list of features currently in the works.***
-* Broadcaster should enable "[Low Latency](https://imgur.com/9rh6cwZ.jpg)" mode for optimal responsiveness.
-  * Navigate to [Creator Dashboard](https://dashboard.twitch.tv/) -> Settings (on lefthand menu) -> Stream -> Latency mode: **Low latency**
-* Viewers should also enable "[Low Latency](https://imgur.com/rsz3uNL.jpg)" for optimal responsiveness. Viewers have reported message-to-action latency as low as ~4 seconds - probably best suited for long-form, ambient compositions.
-  * On the live video player, click the gear icon -> Advanced -> Low Latency (ON)
+* Broadcaster should enable "Low Latency" mode for optimal responsiveness.
+  * Navigate to [Creator Dashboard](https://dashboard.twitch.tv/) -> Settings (on lefthand menu) -> Stream -> Latency mode: **Low latency** ([screenshot](https://imgur.com/9rh6cwZ.jpg))
+* Viewers should also enable "Low Latency" for optimal responsiveness. Viewers have reported message-to-action latency as low as ~4 seconds - probably best suited for long-form, ambient compositions.
+  * On the live video player, click the gear icon -> Advanced -> Low Latency (ON) ([screenshot](https://imgur.com/rsz3uNL.jpg))
 * Spamming commands works best in a third-party chat client like [Chatterino](https://chatterino.com/). Simply type your message and hold down Ctrl+Enter (Windows) / Cmd+Enter (macOS) to send rapid-fire. Command spam is encouraged!
 
 ## Available commands
