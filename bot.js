@@ -7,12 +7,13 @@ by Megaphonix
 
 // Imports
 const opts = require('./credentials.js').opts;
-const noteToMidi = require('./noteToMidi.js').noteToMidi;
 const params = require('./params.js').params;
 const muteNums = require('./params.js').mutes;
-const parseNotes = require('./parseNotes.js').parseNotes;
 const drumGroup = params.slice(6,11);
 const instGroup = params.slice(15,19);
+const instrumentHandler = require('./instrumentHandler.js').instrumentHandler;
+const knobHandler = require('./knobHandler.js').knobHandler;
+const tempoHandler = require('./tempoHandler.js').tempoHandler;
 
 const tmi = require('tmi.js');
 const midi = require('midi');
@@ -114,14 +115,6 @@ async function onMessageHandler (target, context, msg, self) {
         client.say(target, 'Available MIDI commands can be found here: https://mgphx.me/MIDIphonix')
         console.log(`* Executed ${commandName} command`);
       }
-
-      /*
-      else if (commandName === '#?tempo') {
-        
-        client.say(target, `Current tempo: ${currentTempo}`);
-
-      }
-      */
 
       else {
 
@@ -242,151 +235,79 @@ async function onMessageHandler (target, context, msg, self) {
         }
 
         else if (paramsType === 'knob') {
-      
+
+          // If message is a query ('#?[command]'), retrieve knob value and post in chat
           if (commandName[1] === '?') {
 
-            var requestedValue = null;
-            var listOfKnobs = Object.entries(knobState);
+            if (commandName === '#?tempo' || commandName === '#?bpm') {
 
-            for (let i = 0; i < listOfKnobs.length; i++) {
+                client.say(target, `Current tempo: ${currentTempo}`);
+        
+            }
 
-              if (listOfKnobs[i][0] === params[paramsIndex][2].toString()) {
+            else {
 
-                requestedValue = Math.round((listOfKnobs[i][1].lastKnownValue / 127) * 100);
-                break;
+                var requestedValue = null;
+                var listOfKnobs = Object.entries(knobState);
+
+                for (let i = 0; i < listOfKnobs.length; i++) {
+
+                    if (listOfKnobs[i][0] === params[paramsIndex][2].toString()) {
+
+                    requestedValue = Math.round((listOfKnobs[i][1].lastKnownValue / 127) * 100);
+
+                    }
+
+                }
+
+                client.say(target, `Current ${params[paramsIndex][0]} value: ${requestedValue}`);
+
+            }  
+
+        }
+
+        else {  
+
+          if (commandName === '#tempo' || commandName === '#bpm') {
+
+            var tempoHandlerReturn = await knobHandler(commandName, knobState, paramsNum, client, target,
+              commandValues, context, output, currentTempo, tempoCooldownManager);
+
+            if (tempoHandlerReturn != undefined) {
+
+                currentTempo = tempoHandlerReturn;
 
               }
-            }
-            client.say(target, `Current ${params[paramsIndex][0]} value: ${requestedValue}`);
+    
           }
-          else if (commandValues[0] === undefined) {
-              client.say(target, 'Please specify a value 0-100');
-            }
-          else if (commandName === '#tempo' || commandName === '#bpm') {
-            
-              const tempoCooldownResult = await tempoCooldownManager.executeFunctionAsync();
-
-              if (tempoCooldownResult || context.badges.broadcaster == 1) {
-                if (commandValues[0] < 80 || commandValues[0] > 207) {
-
-                  client.say(target, 'Please select a tempo between 80-207 BPM');
-                }
-
-                else if (commandValues[0] === undefined) {
-
-                  client.say(target, 'Please specify a tempo. Example: "#tempo 128"');
-
-                }
-                else {
-
-                  output.sendMessage([controlChange,paramsNum,commandValues[0]-80]);
-                  currentTempo = commandValues[0];
-                  console.log(currentTempo);
-                  console.log(`* Executed ${commandName} command`);
-
-                }
-              }
-              else {
-
-                // The function is on cooldown, inform the user
-                const remainingTime = tempoCooldownManager.cooldownTime - (Date.now() - tempoCooldownManager.lastExecutionTime);
-                const secondsRemaining = Math.ceil(remainingTime / 1000);
-                client.say(target, `Function is on cooldown. Remaining time: ${secondsRemaining} seconds`);
-
-              }
-            }
 
           else {
 
-            /*
-            const cooldownResult = await fxCooldownManager.executeFunctionAsync();
+            var knobHandlerReturn = await knobHandler(commandName, knobState, paramsNum, client, target,
+              commandValues, context, output, currentTempo, tempoCooldownManager);
 
-            if (cooldownResult) {
-            */
-              const knobValue = parseInt(commandValues[0], 10);
-              const knobId = paramsNum; // Use paramsNum as a unique identifier for each knob
+            if (knobHandlerReturn != undefined) {
 
-              // Initialize the last known value for the knob if it doesn't exist
-              if (!knobState[knobId]) {
-                knobState[knobId] = { lastKnownValue: 0, isTransitioning: false, transitionTime: 0 };
-              }
+              knobState[paramsNum] = knobHandlerReturn;
 
-              const scaledNum = Math.round((knobValue / 100) * 127);
-              const transitionTime = commandValues[1] ? parseFloat(commandValues[1]) * 1000 : 0;
-              // console.log(transitionTime);
-              if (transitionTime > 30000) {
-                client.say(target, 'Please choose a duration between 1-30 seconds');
-              }
-              else {
-                // Check if there is an ongoing transition for the same knobId
-                if (knobState[knobId].isTransitioning) {
-                  // Inform the user about the ongoing transition
-                  const remainingTime = knobState[knobId].transitionTime - (Date.now() - knobState[knobId].startTime);
-                  const secondsRemaining = Math.ceil(remainingTime / 1000);
-                  client.say(target, `Ongoing transition for command ${commandName}. Remaining time: ${secondsRemaining} seconds`);
-                }
-                else {
-                  // Start the new transition
-                  knobState[knobId].isTransitioning = true;
-                  knobState[knobId].transitionTime = transitionTime;
-                  knobState[knobId].startTime = Date.now();
-
-                  if (transitionTime > 0) {
-                    const steps = 100; // Number of steps for the transition
-                    const stepTime = transitionTime / steps;
-
-                    for (let i = 1; i <= steps; i++) {
-                      const currentValue = Math.round((i / steps) * (scaledNum - knobState[knobId].lastKnownValue)) + knobState[knobId].lastKnownValue;
-                      output.sendMessage([controlChange, paramsNum, currentValue]);
-                      // Use the last step to set the knob value accurately
-                      if (i === steps) {
-                        output.sendMessage([controlChange, paramsNum, scaledNum]);
-                      }
-
-                      await sleep(stepTime);
-                    }
-                  }
-                  else {
-                    // No transition time, set the knob value immediately
-                    output.sendMessage([controlChange, paramsNum, scaledNum]);
-                    knobState[knobId].isTransitioning = false;
-                  }
-                }
-
-                // Update the last known value for the knob
-                knobState[knobId].lastKnownValue = scaledNum;
-
-                // The transition is complete
-                knobState[knobId].isTransitioning = false;
-
-                console.log(`* Executed ${commandName} command with scaled knob value ${scaledNum}`);
-              }
-              
             }
-            /*
-             else {
-              // The function is on cooldown, inform the user
-              const remainingTime = fxCooldownManager.cooldownTime - (Date.now() - fxCooldownManager.lastExecutionTime);
-              const secondsRemaining = Math.ceil(remainingTime / 1000);
-              client.say(target, `Function is on cooldown. Remaining time: ${secondsRemaining} seconds`);
-            }
-            */
+
           }
+
+        }
+
+      }
 
         else if (paramsType === 'oneshot') {
 
-          // Program change to correct channel
-          // output.sendMessage([programChange,paramsNum]);
           output.sendMessage([noteOn+15,paramsNum,127]);
           output.sendMessage([noteOff+15,paramsNum,127]);
           console.log([noteOn+15,paramsNum,127]);
           
         }
 
-        else if (paramsType === 'random') {
+        else if (paramsType === 'randomsound') {
 
-          // Program change to correct channel
-          // output.sendMessage([programChange,paramsNum]);
           let rand = middleC + getRandomInt(9);
           output.sendMessage([noteOn,rand,127]);
           output.sendMessage([noteOff,rand,127]);
@@ -395,49 +316,8 @@ async function onMessageHandler (target, context, msg, self) {
 
         else if (paramsType === 'instrument') {
 
-          var noteDuration = 1;
+          instrumentHandler(commandValues, paramsNum, output, client, target);
 
-          if (commandValues.length > 0 && !isNaN(Number(commandValues.slice(-1)))) {
-
-            noteDuration = Number(commandValues.slice(-1));
-          }
-
-          var noteNums = parseNotes(commandValues);
-
-          if (noteNums == -1) {
-            client.say(target, 'One or more invalid note format. Try "c5", "Eb6", etc.')
-            console.log('One or more invalid note format: ' + commandValues);
-          }
-
-          else if (noteNums == -2) {
-
-            client.say(target, 'One or more invalid octaves. Try 1-8');
-            console.log('One or more invalid octaves: ' + commandValues);
-
-          }
-
-          else {
-            if (noteNums.length == 0) {
-
-              noteNums.push(middleC);
-
-            }
-
-            for (let i = 0; i < noteNums.length; i++) {
-
-              output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
-
-            }
-
-            await sleep(noteDuration * 1000);
-
-
-            for (let i = 0; i < noteNums.length; i++) {
-
-              output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
-
-            }
-          }
         }
       }
     }

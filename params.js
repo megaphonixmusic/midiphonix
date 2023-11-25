@@ -16,17 +16,17 @@ exports.params = [
     ['#downsweep',      'oneshot',      57],
     ['#damnson',        'oneshot',      59],
     ['#hookedonphonix', 'oneshot',      60],
-    ['#randomsound',    'random',       0],
-    ['#piano',          'instrument',	1],  // Ctrl 30
-    ['#bass',           'instrument',	2],  // Ctrl 31
-    ['#pad',            'instrument',	3],  // Ctrl 32
-    ['#lead',           'instrument',	4],  // Ctrl 33
-    ['#help',           'help',         0],
-    ['#mute',           'mute',         0],
-    ['#unmute',         'unmute',       0],
-    ['#play',           'play',       251],
-    ['#pause',          'pause',      252],
-    ['#record',         'record',       0],
+    ['#randomsound',    'randomsound',   0],
+    ['#piano',          'instrument',	 1],  // Ctrl 30
+    ['#bass',           'instrument',	 2],  // Ctrl 31
+    ['#pad',            'instrument',	 3],  // Ctrl 32
+    ['#lead',           'instrument',	 4],  // Ctrl 33
+    ['#help',           'help',          0],
+    ['#mute',           'mute',          0],
+    ['#unmute',         'unmute',        0],
+    ['#play',           'play',        251],
+    ['#pause',          'pause',       252],
+    ['#record',         'record',        0],
     ['#transpose',      'knob',        25, '#transpose']
 ];
 
