@@ -15,7 +15,7 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 ## Installation
 1. Install [Node.js](https://nodejs.org/) followed by prerequisites above
 2. Extract MIDIphonix source code to a folder of your choice
-3. Rename "credentials.js.example" file to "credentials.js"
+3. Rename `credentials.js.example` file to `credentials.js`
 4. Replace values in "credentials.js" with your own preferences, according to the [Twitch Developers guide](https://dev.twitch.tv/docs/irc/get-started/#specify-the-configuration-settings) (this will also guide you through setting up the bot account and OAuth token)
 5. Open Command Prompt (Windows) and navigate to the `midiphonix` folder path (`cd [path]`)
 6. Type `node bot.js` and hit Enter. The bot should start running in the Command Prompt; use Ctrl-C to exit the bot process.
