@@ -14,7 +14,7 @@ const tempoHandler = require('./tempoHandler.js').tempoHandler;
 exports.knobHandler = async function(commandName, knobState, paramsNum,
     client, target, commandValues, context, output, currentTempo, tempoCooldownManager) {
 
-    if (commandName === '#tempo' || commandName === '#bpm') {
+    if (commandName === 'tempo' || commandName === 'bpm') {
 
         currentTempo = await tempoHandler(commandValues, paramsNum, client, target,
             tempoCooldownManager, context, output, currentTempo);

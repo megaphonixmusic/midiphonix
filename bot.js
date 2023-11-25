@@ -9,14 +9,28 @@ by Megaphonix
 const opts = require('./credentials.js').opts;
 const params = require('./params.js').params;
 const muteNums = require('./params.js').mutes;
-const drumGroup = params.slice(6,11);
-const instGroup = params.slice(15,19);
+const drumMuteNums = [];
+const instMuteNums = [];
 const instrumentHandler = require('./instrumentHandler.js').instrumentHandler;
 const knobHandler = require('./knobHandler.js').knobHandler;
 const tempoHandler = require('./tempoHandler.js').tempoHandler;
 
 const tmi = require('tmi.js');
 const midi = require('midi');
+
+// Collect and sort channels into mute groups by flag (from params.js)
+for (let i = 0; i < params.length; i++) {
+  var muteGroupFlag = params[i][4];
+  if (muteGroupFlag != undefined) {
+    var muteNum = params[i][3];
+    if (muteGroupFlag === 'drums') {
+      drumMuteNums.push(muteNum);
+    }
+    else if (muteGroupFlag === 'instruments') {
+      instMuteNums.push(muteNum);
+    }
+  }
+}
 
 // Import the CooldownManager class
 const CooldownManager = require('./cooldownManager');
@@ -88,12 +102,13 @@ async function onMessageHandler (target, context, msg, self) {
   if (self) { return; } // Ignore messages from the bot
 
   const contents = msg.toLowerCase().split(' ');
-  
-  // First word of the message should ALWAYS be the presumed command name
-  const commandName = contents[0];
 
   // ONLY PROCEED IF MESSAGE IS A #COMMAND, otherwise do nothing
-  if (commandName.startsWith('#')) {
+  if (contents[0].startsWith('#')) {
+
+    // First word of the message should ALWAYS be the presumed command name
+    // Remove # character for easier reference
+    const commandName = contents[0].slice(1);
 
     // Parse all non-command params and init array of note(s)
     var commandValues = contents.slice(1);
@@ -111,7 +126,7 @@ async function onMessageHandler (target, context, msg, self) {
     else {
 
       // Help command
-      if (commandName === '#help') {
+      if (commandName === 'help') {
         client.say(target, 'Available MIDI commands can be found here: https://mgphx.me/MIDIphonix')
         console.log(`* Executed ${commandName} command`);
       }
@@ -164,12 +179,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           if (commandValues[0] === 'drums') {
 
-            // THIS LINE IS HARDCODED FROM PARAMS.JS
-            // IF PARAMS.JS LIST CHANGES, PLEASE CONSULT HERE
+            for (let i = 0; i < drumMuteNums.length; i++) {
 
-            for (let i = 0; i < 5; i++) {
-
-              output.sendMessage([controlChange,muteNums[i][1],0]);
+              output.sendMessage([controlChange,drumMuteNums[i],0]);
 
             }
 
@@ -177,12 +189,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           else if (commandValues[0] === 'instruments') {
 
-            // THIS LINE IS HARDCODED FROM PARAMS.JS
-            // IF PARAMS.JS LIST CHANGES, PLEASE CONSULT HERE
+            for (let i = 0; i < instMuteNums.length; i++) {
 
-            for (let i = 5; i < 9; i++) {
-
-              output.sendMessage([controlChange,muteNums[i][1],0]);
+              output.sendMessage([controlChange,instMuteNums[i],0]);
 
             }
 
@@ -190,8 +199,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           else {
 
-            var targetIndex = muteNums.indexOf(muteNums.find(arr => arr.includes(commandValues[0])));
-            output.sendMessage([controlChange,muteNums[targetIndex][1],0]);
+            // Find corresponding CHANNEL entry in params.js
+            var channelIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
+            output.sendMessage([controlChange,params[channelIndex][3],0]);
 
           }
           
@@ -201,12 +211,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           if (commandValues[0] === 'drums') {
 
-            // THIS LINE IS HARDCODED FROM PARAMS.JS
-            // IF PARAMS.JS LIST CHANGES, PLEASE CONSULT HERE
+            for (let i = 0; i < drumMuteNums.length; i++) {
 
-            for (let i = 0; i < 5; i++) {
-
-              output.sendMessage([controlChange,muteNums[i][1],127]);
+              output.sendMessage([controlChange,drumMuteNums[i],127]);
 
             }
 
@@ -214,12 +221,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           else if (commandValues[0] === 'instruments') {
 
-            // THIS LINE IS HARDCODED FROM PARAMS.JS
-            // IF PARAMS.JS LIST CHANGES, PLEASE CONSULT HERE
-            
-            for (let i = 5; i < 9; i++) {
+            for (let i = 0; i < instMuteNums.length; i++) {
 
-              output.sendMessage([controlChange,muteNums[i][1],127]);
+              output.sendMessage([controlChange,instMuteNums[i],127]);
 
             }
 
@@ -227,8 +231,9 @@ async function onMessageHandler (target, context, msg, self) {
 
           else {
 
-            var targetIndex = muteNums.indexOf(muteNums.find(arr => arr.includes(commandValues[0])));
-            output.sendMessage([controlChange,muteNums[targetIndex][1],127]);
+            // Find corresponding CHANNEL entry in params.js
+            var channelIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
+            output.sendMessage([controlChange,params[channelIndex][3],127]);
 
           }
           
@@ -237,9 +242,9 @@ async function onMessageHandler (target, context, msg, self) {
         else if (paramsType === 'knob') {
 
           // If message is a query ('#?[command]'), retrieve knob value and post in chat
-          if (commandName[1] === '?') {
+          if (commandName[0] === '?') {
 
-            if (commandName === '#?tempo' || commandName === '#?bpm') {
+            if (commandName === '?tempo' || commandName === '?bpm') {
 
                 client.say(target, `Current tempo: ${currentTempo}`);
         
@@ -268,7 +273,7 @@ async function onMessageHandler (target, context, msg, self) {
 
         else {  
 
-          if (commandName === '#tempo' || commandName === '#bpm') {
+          if (commandName === 'tempo' || commandName === 'bpm') {
 
             var tempoHandlerReturn = await knobHandler(commandName, knobState, paramsNum, client, target,
               commandValues, context, output, currentTempo, tempoCooldownManager);
@@ -302,7 +307,6 @@ async function onMessageHandler (target, context, msg, self) {
 
           output.sendMessage([noteOn+15,paramsNum,127]);
           output.sendMessage([noteOff+15,paramsNum,127]);
-          console.log([noteOn+15,paramsNum,127]);
           
         }
 
