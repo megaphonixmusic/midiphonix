@@ -1,5 +1,7 @@
 // Handles all 'knob' type commands
 
+const { params } = require('./params.js');
+
 // Define commonly used MIDI codes
 const middleC = 60;
 const noteOn = 144;
@@ -14,7 +16,25 @@ const tempoHandler = require('./tempoHandler.js').tempoHandler;
 exports.knobHandler = async function(commandName, knobState, paramsNum,
     client, target, commandValues, context, output, currentTempo, tempoCooldownManager) {
 
-    if (commandName === 'tempo' || commandName === 'bpm') {
+    if (commandName === 'key') {
+
+        if (commandValues[0] === undefined || isNaN(Number(commandValues[0]))) {
+
+            client.say(target, 'Please specify a value in semitones, between -12 and +12');
+
+        }
+
+        else {
+
+            var semitones = Number(commandValues[0]);
+            var scaledSemitones = Math.round((semitones + 12) / 0.188976378);
+            output.sendMessage([controlChange, paramsNum, scaledSemitones]);
+
+        }
+
+    }
+
+    else if (commandName === 'tempo' || commandName === 'bpm') {
 
         currentTempo = await tempoHandler(commandValues, paramsNum, client, target,
             tempoCooldownManager, context, output, currentTempo);
@@ -29,7 +49,7 @@ exports.knobHandler = async function(commandName, knobState, paramsNum,
 
     else if (commandValues[0] === undefined) {
 
-        client.say(target, 'Please specify a value 0-100');
+        client.say(target, 'Please specify a value 0-100%');
 
     }
 

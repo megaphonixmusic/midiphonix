@@ -10,8 +10,9 @@ exports.params = [
     ['phaser',		   'knob',			23, '?phaser'],
     ['tempo',          'knob',          24,  '?tempo'],
     ['bpm',            'knob',          24,    '?bpm'],
+    ['key',            'knob',          34,    '?key'],
 
-    // Name             Type      FL Ctrl#|  Mute Ctrl#     MuteGroup
+    // Name             Type        Note #   Mute Ctrl#     MuteGroup
     ['kick',           'oneshot', 		48,         25,       'drums'],
     ['snare',          'oneshot', 		50,         26,       'drums'],
     ['hihat',          'oneshot', 		52,         27,       'drums'],
@@ -30,7 +31,6 @@ exports.params = [
     ['unmute',         'unmute',        0],
     ['play',           'play',        251],
     ['pause',          'pause',       252],
-    ['record',         'record',        0],
-    ['transpose',      'knob',         25]
+    ['record',         'record',        0]
 
 ];
