@@ -23,6 +23,8 @@ exports.instrumentHandler = async function(commandValues, paramsNum, output, cli
 
   var noteNums = parseNotes(commandValues);
 
+  console.log(noteNums);
+
   if (noteNums == -1) {
 
     client.say(target, 'One or more invalid note format. Try "c5", "Eb6", etc.')
