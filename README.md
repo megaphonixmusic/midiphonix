@@ -126,7 +126,7 @@ See *[Available commands](#Available-commands)* below and try it out on https://
   * #kick1
   * #snare1
   * Etc.
-* Link to Performance Mode loops
+  * Link to Performance Mode loops
 * Sequencing messages
   * #seq [instrument] [notes]
 * Replace samples
