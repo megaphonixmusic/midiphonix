@@ -1,16 +1,15 @@
 // Define controllable parameters and corresponding MIDI info
-// Format: [command, type, CC#/channel index]
 
 exports.params = [
 
-    // Name             Type      FL Ctrl#  Query Name
-    ['cutoff',         'knob',   		20, '?cutoff'],
-    ['reverb',         'knob',  		21, '?reverb'],
-    ['delay',          'knob',   		22,  '?delay'],
-    ['phaser',		   'knob',			23, '?phaser'],
-    ['tempo',          'knob',          24,  '?tempo'],
-    ['bpm',            'knob',          24,    '?bpm'],
-    ['key',            'knob',          35,    '?key'],
+    // Name                         Type       FL Ctrl#
+    [['cutoff','?cutoff'],          'knob',   	    20],
+    [['reverb','?reverb'],          'knob',  		21],
+    [['delay','?delay'],            'knob',   		22],
+    [['phaser','?phaser'],		    'knob',			23],
+    [['tempo','?tempo'],            'knob',         24],
+    [['bpm','?bpm'],                'knob',         24],
+    [['key','?key'],                'knob',         35],
 
     // Name             Type        Note #   Mute Ctrl#     MuteGroup
     ['kick',           'oneshot', 		48,         25,       'drums'],
@@ -34,6 +33,28 @@ exports.params = [
     ['pause',          'pause',       252],
     ['record',         'record',        0],
     ['perfmode',       'mode',          0],
-    ['seq',            'seq',           0]
+    ['seq',            'seq',           0],
+    ['FX'],
+    ['guitarloop'],
+    ['shakerloop'],
+    ['percussionloop'],
+    ['buildup']
+
+];
+
+// This must match the order of Tracks in the Performance Mode playlist/arrangement:
+
+exports.perfModeOrder = [
+
+    'kick',
+    'snare',
+    'hihat',
+    'tom',
+    'crash',
+    'FX',
+    'guitarloop',
+    'shakerloop',
+    'percussionloop',
+    'buildup'
 
 ];

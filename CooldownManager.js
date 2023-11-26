@@ -17,7 +17,7 @@ class CooldownManager {
       const secondsRemaining = Math.ceil(remainingTime / 1000);
       
       // Log the remaining cooldown to the console
-      console.log(`Function is on cooldown. Remaining time: ${secondsRemaining} seconds`);
+      // console.log(`Function is on cooldown. Remaining time: ${secondsRemaining} seconds`);
 
       return false; // Indicate that the function is on cooldown
     }

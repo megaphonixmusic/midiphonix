@@ -9,6 +9,7 @@ by Megaphonix
 const opts = require('./credentials.js').opts;
 const params = require('./params.js').params;
 const muteNums = require('./params.js').mutes;
+const perfMode = require('./perfMode.js').perfMode;
 const drumMuteNums = [];
 const instMuteNums = [];
 const instrumentHandler = require('./instrumentHandler.js').instrumentHandler;
@@ -102,6 +103,8 @@ var validNames = [];
 for (let i = 0; i < params.length; i++) {
   validNames.push(params[i][0]);
 }
+validNames = validNames.flat();
+console.log(validNames);
 
 
 
@@ -112,7 +115,7 @@ async function onMessageHandler (target, context, msg, self) {
 
   const contents = msg.toLowerCase().split(' ');
 
-  // ONLY PROCEED IF MESSAGE IS A #COMMAND, otherwise do nothing
+  // ONLY PROCEED IF MESSAGE STARTS WITH A #COMMAND, otherwise do nothing
   if (contents[0].startsWith('#')) {
 
     // First word of the message should ALWAYS be the presumed command name
@@ -134,8 +137,8 @@ async function onMessageHandler (target, context, msg, self) {
       var isSeq = false;
 
       // Find corresponding command entry in params.js
-      var paramsIndex = params.indexOf(params.find(arr => arr.includes(commandName)));
-
+      var paramsIndex = params.indexOf(params.find(arr => arr.flat().includes(commandName)));
+      
       // Help command
       if (commandName === 'help') {
         client.say(target, 'Available MIDI commands can be found here: https://mgphx.me/MIDIphonix')
@@ -175,6 +178,8 @@ async function onMessageHandler (target, context, msg, self) {
 
         }
 
+        console.log(`* isPerfModeEnabled: ${isPerfModeEnabled}`)
+
       }
 
       else {
@@ -182,13 +187,13 @@ async function onMessageHandler (target, context, msg, self) {
         var paramsType = params[paramsIndex][1];
         var paramsNum = params[paramsIndex][2];
 
-        if (paramsType === 'play' || paramsType === 'pause') {
+        if (isBroadcaster && (paramsType === 'play' || paramsType === 'pause')) {
 
           output.sendMessage([paramsNum]);
 
         }
 
-        else if (paramsType === 'record') {
+        else if (isBroadcaster && paramsType === 'record') {
 
           var recDuration = 5;
           
@@ -353,49 +358,91 @@ async function onMessageHandler (target, context, msg, self) {
 
       }
 
+      else if (paramsType === 'randomsound') {
+
+        let rand = middleC + getRandomInt(9);
+        output.sendMessage([noteOn,rand,127]);
+        output.sendMessage([noteOff,rand,127]);
+        
+      }
+
         else if (paramsType === 'oneshot') {
 
-          output.sendMessage([noteOn+15,paramsNum,127]);
-          output.sendMessage([noteOff+15,paramsNum,127]);
-          
-        }
+          if (isPerfModeEnabled) {
 
-        else if (paramsType === 'randomsound') {
-
-          let rand = middleC + getRandomInt(9);
-          output.sendMessage([noteOn,rand,127]);
-          output.sendMessage([noteOff,rand,127]);
-          
-        }
-
-        else if (paramsType === 'instrument') {
-
-          instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
-
-        }
-
-        else if (paramsType === 'seq') {
-
-          var isSeq = true;
-
-          if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
+            var perfModeReturn = perfMode(commandName, commandValues, client, target);
             
-            client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`)
-            console.log(`* Invalid instrument name: ${commandValues[0]}`)
+            if (perfModeReturn != undefined) {
 
+              output.sendMessage([noteOn+14,perfModeReturn,127]);
+              output.sendMessage([noteOff+14,perfModeReturn,127]);
+
+            }
+          
           }
 
           else {
 
-            paramsIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
-            paramsNum = params[paramsIndex][2];
+            output.sendMessage([noteOn+15,paramsNum,127]);
+            output.sendMessage([noteOff+15,paramsNum,127]);
+
+          }
+
+        }
+
+        else if (paramsType === 'instrument') {
+
+          if (isPerfModeEnabled) {
+
+            var perfModeReturn = perfMode(commandName, commandValues, client, target);
+            
+            if (perfModeReturn != undefined) {
+
+              output.sendMessage([noteOn+14,perfModeReturn,127]);
+              output.sendMessage([noteOff+14,perfModeReturn,127]);
+
+            }
+          
+          }
+
+          else {
 
             instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
 
           }
 
         }
+
+        else if (paramsType === 'seq') {
+
+          if (isPerfModeEnabled) {
+
+            client.say(target, 'Command unavailable - performance mode enabled')
+
+          }
+
+          else {
+
+            var isSeq = true;
+
+            if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
+              
+              client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`)
+              console.log(`* Invalid instrument name: ${commandValues[0]}`)
+
+            }
+
+            else {
+
+              paramsIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
+              paramsNum = params[paramsIndex][2];
+
+              instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
+
+            }
+          }
+        }
       }
     }
   }
-}
+};
