@@ -10,7 +10,7 @@ exports.params = [
     ['phaser',		   'knob',			23, '?phaser'],
     ['tempo',          'knob',          24,  '?tempo'],
     ['bpm',            'knob',          24,    '?bpm'],
-    ['key',            'knob',          34,    '?key'],
+    ['key',            'knob',          35,    '?key'],
 
     // Name             Type        Note #   Mute Ctrl#     MuteGroup
     ['kick',           'oneshot', 		48,         25,       'drums'],
@@ -26,11 +26,14 @@ exports.params = [
     ['bass',           'instrument',	 2,         31, 'instruments'],
     ['pad',            'instrument',	 3,         32, 'instruments'],
     ['lead',           'instrument',	 4,         33, 'instruments'],
+    ['arp',            'instrument',     5,         34, 'instruments'],
     ['help',           'help',          0],
     ['mute',           'mute',          0],
     ['unmute',         'unmute',        0],
     ['play',           'play',        251],
     ['pause',          'pause',       252],
-    ['record',         'record',        0]
+    ['record',         'record',        0],
+    ['perfmode',       'mode',          0],
+    ['seq',            'seq',           0]
 
 ];

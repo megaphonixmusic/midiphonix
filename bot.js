@@ -79,6 +79,9 @@ client.connect();
 output.sendMessage([controlChange, params[4][2], 40]);
 var currentTempo = 120;
 
+// Initialize Performance Mode
+var isPerfModeEnabled = false;
+
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
@@ -92,6 +95,12 @@ function sleep(ms) {
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
+}
+
+// Get valid names list from params.js
+var validNames = [];
+for (let i = 0; i < params.length; i++) {
+  validNames.push(params[i][0]);
 }
 
 
@@ -113,11 +122,8 @@ async function onMessageHandler (target, context, msg, self) {
     // Parse all non-command params and init array of note(s)
     var commandValues = contents.slice(1);
 
-    // Find corresponding command entry in params.js
-    var paramsIndex = params.indexOf(params.find(arr => arr.includes(commandName)));
-
-    // If command is not found in params.js, throw error + chat msg
-    if (paramsIndex == -1) {
+    // If command is not found in validNames, throw error + chat msg
+    if (!validNames.includes(commandName)) {
       client.say(target, `Unknown command ${commandName}`);
       console.log(`* Unknown command ${commandName}`);
     }
@@ -125,10 +131,50 @@ async function onMessageHandler (target, context, msg, self) {
     // Otherwise, proceed:
     else {
 
+      var isSeq = false;
+
+      // Find corresponding command entry in params.js
+      var paramsIndex = params.indexOf(params.find(arr => arr.includes(commandName)));
+
       // Help command
       if (commandName === 'help') {
         client.say(target, 'Available MIDI commands can be found here: https://mgphx.me/MIDIphonix')
         console.log(`* Executed ${commandName} command`);
+      }
+
+      var isBroadcaster = false;
+
+      if (context.badges != null) {
+
+        if (context.badges.broadcaster == 1) {
+
+          isBroadcaster = true;
+
+        }
+
+        else {
+
+          isBroadcaster = false;
+
+        }
+
+      }
+
+      // If broadcaster switches to Performance Mode, change commands accordingly
+      if (isBroadcaster && commandName === 'perfmode') {
+
+        if (commandValues[0] === 'on') {
+
+          isPerfModeEnabled = true;
+
+        }
+
+        else if (commandValues[0] === 'off') {
+
+          isPerfModeEnabled = false;
+
+        }
+
       }
 
       else {
@@ -145,10 +191,14 @@ async function onMessageHandler (target, context, msg, self) {
         else if (paramsType === 'record') {
 
           var recDuration = 5;
+          
+          if (context.badges.broadcaster != 1 || context.badges == null) {
 
-          if (commandValues[0] > 20 || commandValues[0] < 5) {
+            if (commandValues[0] > 30 || commandValues[0] < 5) {
 
-            client.say(target, 'Record length limited to 5-20 seconds');
+              client.say(target, 'Record length limited to 5-30 seconds');
+
+            }
 
           }
 
@@ -320,7 +370,29 @@ async function onMessageHandler (target, context, msg, self) {
 
         else if (paramsType === 'instrument') {
 
-          instrumentHandler(commandValues, paramsNum, output, client, target);
+          instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
+
+        }
+
+        else if (paramsType === 'seq') {
+
+          var isSeq = true;
+
+          if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
+            
+            client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`)
+            console.log(`* Invalid instrument name: ${commandValues[0]}`)
+
+          }
+
+          else {
+
+            paramsIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
+            paramsNum = params[paramsIndex][2];
+
+            instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
+
+          }
 
         }
       }

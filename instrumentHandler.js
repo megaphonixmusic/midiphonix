@@ -12,19 +12,23 @@ function sleep(ms) {
   });
 }
 
-exports.instrumentHandler = async function(commandValues, paramsNum, output, client, target) {
-  var noteDuration = 1;
+exports.instrumentHandler = async function(commandValues, paramsNum, output, client, target, isSeq, currentTempo) {
+  
+  
 
-  if (commandValues.length > 0 && !isNaN(Number(commandValues.slice(-1)))) {
+  
+  if (isSeq) {
 
-    noteDuration = Number(commandValues.slice(-1));
+    var noteNums = parseNotes(commandValues.slice(1));
 
   }
 
-  var noteNums = parseNotes(commandValues);
+  else {
 
-  console.log(noteNums);
+    var noteNums = parseNotes(commandValues);
 
+  }
+  
   if (noteNums == -1) {
 
     client.say(target, 'One or more invalid note format. Try "c5", "Eb6", etc.')
@@ -38,28 +42,55 @@ exports.instrumentHandler = async function(commandValues, paramsNum, output, cli
     console.log(`One or more invalid octaves: ${commandValues}`);
 
   }
-
+  
   else {
+    var noteDuration = 1;
 
-    if (noteNums.length == 0) {
+    if (commandValues.length > 0 && !isNaN(Number(commandValues.slice(-1)))) {
 
-      noteNums.push(middleC);
-
-    }
-
-    for (let i = 0; i < noteNums.length; i++) {
-
-      output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
+      noteDuration = Number(commandValues.slice(-1));
 
     }
 
-    await sleep(noteDuration * 1000);
+    else {
+
+      if (isSeq) {
+
+        var noteLength = (1 / (currentTempo * 2)) * 60000;
+
+        for (let i = 0; i < noteNums.length; i++) {
+
+          output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
+          await sleep(noteLength);
+          output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
+
+        }
+
+      }
+
+      else {
+
+        if (noteNums.length == 0) {
+
+          noteNums.push(middleC);
+
+        }
+
+        for (let i = 0; i < noteNums.length; i++) {
+
+          output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
+
+        }
+
+        await sleep(noteDuration * 1000);
 
 
-    for (let i = 0; i < noteNums.length; i++) {
+        for (let i = 0; i < noteNums.length; i++) {
 
-      output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
+          output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
 
+        }
+      }
     }
   }
 };

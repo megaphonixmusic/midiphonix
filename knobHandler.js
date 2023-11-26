@@ -12,6 +12,12 @@ const programChange = 192;
 // Import tempoHandler function
 const tempoHandler = require('./tempoHandler.js').tempoHandler; 
 
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 // knobHandler function
 exports.knobHandler = async function(commandName, knobState, paramsNum,
     client, target, commandValues, context, output, currentTempo, tempoCooldownManager) {
@@ -57,6 +63,14 @@ exports.knobHandler = async function(commandName, knobState, paramsNum,
 
         const knobValue = parseInt(commandValues[0], 10);
         const knobId = paramsNum; // Use paramsNum as a unique identifier for each knob
+
+        if (knobValue > 100 || knobValue < 0) {
+
+          client.say(target, 'Please specify a value between 0-100%');
+
+        }
+
+        else {
 
         // Initialize the last known value for the knob if it doesn't exist
         if (!knobState[knobId]) {
@@ -126,3 +140,4 @@ exports.knobHandler = async function(commandName, knobState, paramsNum,
       }
 
     }
+}
