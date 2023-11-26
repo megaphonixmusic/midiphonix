@@ -13,12 +13,13 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 * [node-midi](https://www.npmjs.com/package/midi) for MIDI integration
 
 ## Installation
-1. Install [Node.js](https://nodejs.org/) followed by prerequisites above
+1. Install [Node.js](https://nodejs.org/)
 2. Extract MIDIphonix source code to a folder of your choice
 3. Rename `credentials.js.example` file to `credentials.js`
 4. Replace values in `credentials.js` with your own preferences, following the [Twitch Developers guide](https://dev.twitch.tv/docs/irc/get-started/#specify-the-configuration-settings) (this will also guide you through setting up the bot account and OAuth token)
 5. Open Command Prompt (Windows) and navigate to the `midiphonix` folder path (`cd [path]`)
-6. Type `node bot.js` and hit Enter. The bot should start running in the Command Prompt; use Ctrl-C to exit the bot process.
+6. Type `npm install` to install dependencies/prerequisites
+7. Type `node bot.js` and hit Enter. The bot should start running in the Command Prompt; use Ctrl-C to exit the bot process.
     * ***THIS IS WHERE THE LOCAL PROCESS RESIDES - CLOSING THIS WINDOW SHUTS DOWN THE BOT***
 
 ## FYI
