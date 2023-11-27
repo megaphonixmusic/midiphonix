@@ -3,7 +3,7 @@
 exports.params = [
 
     // Name                         Type       FL Ctrl#
-    [['cutoff','?cutoff'],          'knob',   	    20],
+    [['filter','?filter'],          'knob',   	    20],
     [['reverb','?reverb'],          'knob',  		21],
     [['delay','?delay'],            'knob',   		22],
     [['phaser','?phaser'],		    'knob',			23],
@@ -13,7 +13,7 @@ exports.params = [
 
     // Name             Type        Note #   Mute Ctrl#     MuteGroup
     ['kick',           'oneshot', 		48,         25,       'drums'],
-    ['snare',          'oneshot', 		50,         26,       'drums'],
+    ['clap',           'oneshot', 		50,         26,       'drums'],
     ['hihat',          'oneshot', 		52,         27,       'drums'],
     ['tom',            'oneshot', 		53,         28,       'drums'],
     ['crash',          'oneshot', 		55,         29,       'drums'],
@@ -34,11 +34,12 @@ exports.params = [
     ['record',         'record',        0],
     ['perfmode',       'mode',          0],
     ['seq',            'seq',           0],
-    ['FX'],
-    ['guitarloop'],
-    ['shakerloop'],
-    ['percussionloop'],
-    ['buildup']
+    ['fx',             'oneshot',       0],
+    ['guitar',         'oneshot',       0],
+    ['shaker',         'oneshot',       0],
+    ['percussion',     'oneshot',       0],
+    ['buildup',        'oneshot',       0],
+    ['commands',       'commands',      0]
 
 ];
 
@@ -47,14 +48,14 @@ exports.params = [
 exports.perfModeOrder = [
 
     'kick',
-    'snare',
+    'clap',
     'hihat',
     'tom',
     'crash',
-    'FX',
-    'guitarloop',
-    'shakerloop',
-    'percussionloop',
-    'buildup'
+    'fx',
+    'buildup',
+    'guitar',
+    'shaker',
+    'percussion'
 
 ];

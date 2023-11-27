@@ -8,7 +8,7 @@ by Megaphonix
 // Imports
 const opts = require('./credentials.js').opts;
 const params = require('./params.js').params;
-const muteNums = require('./params.js').mutes;
+const perfModeOrder = require('./params.js').perfModeOrder;
 const perfMode = require('./perfMode.js').perfMode;
 const drumMuteNums = [];
 const instMuteNums = [];
@@ -98,13 +98,28 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-// Get valid names list from params.js
+// Create list of valid command names from params.js
 var validNames = [];
 for (let i = 0; i < params.length; i++) {
   validNames.push(params[i][0]);
 }
 validNames = validNames.flat();
-console.log(validNames);
+
+// Make them printable in chat
+var printableNames = [];
+for (let i = 0; i < validNames.length; i++) {
+  printableNames.push(' #'+validNames[i]);
+}
+
+// Create list of valid sequencable names (instruments)
+var validSeqNames = [];
+for (let i = 0; i < params.length; i++) {
+  if (params[i][1] === 'instrument') {
+    validSeqNames.push(params[i][0]);
+  }
+}
+console.log(`validSeqNames: ${validSeqNames}`);
+
 
 
 
@@ -141,8 +156,15 @@ async function onMessageHandler (target, context, msg, self) {
       
       // Help command
       if (commandName === 'help') {
-        client.say(target, 'Available MIDI commands can be found here: https://mgphx.me/MIDIphonix')
+        client.say(target, 'MIDIphonix Guide can be found here: https://mgphx.me/MIDIphonix')
         console.log(`* Executed ${commandName} command`);
+      }
+
+      if (commandName === 'commands') {
+
+        client.say(target, `Available commands:${printableNames}`);
+        console.log(`* Executed ${commandName} command`);
+
       }
 
       var isBroadcaster = false;
@@ -366,69 +388,63 @@ async function onMessageHandler (target, context, msg, self) {
         
       }
 
-        else if (paramsType === 'oneshot') {
+      else {
 
-          if (isPerfModeEnabled) {
+        if (isPerfModeEnabled && perfModeOrder.includes(commandName)) {
 
-            var perfModeReturn = perfMode(commandName, commandValues, client, target);
-            
-            if (perfModeReturn != undefined) {
-
-              output.sendMessage([noteOn+14,perfModeReturn,127]);
-              output.sendMessage([noteOff+14,perfModeReturn,127]);
-
-            }
+          var perfModeReturn = perfMode(commandName, commandValues);
           
-          }
+          if (perfModeReturn == undefined) {
 
+            client.say(target, `Invalid value. Please select a pattern #1-4 or 'stop'`);
+
+          } 
+        
           else {
+
+            output.sendMessage([noteOn+14,perfModeReturn,127]);
+            output.sendMessage([noteOff+14,perfModeReturn,127]);
+
+          }
+        
+        }
+
+        else if (paramsType === 'oneshot') {
 
             output.sendMessage([noteOn+15,paramsNum,127]);
             output.sendMessage([noteOff+15,paramsNum,127]);
 
           }
 
-        }
-
         else if (paramsType === 'instrument') {
-
-          if (isPerfModeEnabled) {
-
-            var perfModeReturn = perfMode(commandName, commandValues, client, target);
-            
-            if (perfModeReturn != undefined) {
-
-              output.sendMessage([noteOn+14,perfModeReturn,127]);
-              output.sendMessage([noteOff+14,perfModeReturn,127]);
-
-            }
-          
-          }
-
-          else {
 
             instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
 
           }
 
-        }
-
         else if (paramsType === 'seq') {
 
-          if (isPerfModeEnabled) {
+          /* if (isPerfModeEnabled) {
 
             client.say(target, 'Command unavailable - performance mode enabled')
 
-          }
+          } 
 
-          else {
+          else { }*/
 
             var isSeq = true;
 
             if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
               
-              client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`)
-              console.log(`* Invalid instrument name: ${commandValues[0]}`)
+              client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`);
+              console.log(`* Invalid instrument name: ${commandValues[0]}`);
+
+            }
+
+            else if (!validSeqNames.includes(commandValues[0])) {
+
+              client.say(target, `Sequencing "${commandValues[0]}" not supported. Try another instrument (e.g. piano)`);
+              console.log(`* Sequencing ${commandValues[0]} not supported`);
 
             }
 
