@@ -39,7 +39,3 @@ See here: https://mgphx.me/MIDIphonix
   * Maybe not a good idea for 24/7 unattended streams
 * Replace samples
   * i.e. #snare A, #snare B, etc.
-* #vocal [vowels]
-  * Play a saw wave going through a formant filter and pair the formant filter to letter values in a commandValues string
-  * e.g. "#vocal aaaeeeiiiiooouuuu" or "#vocal aioaioaioaioaio" etc.
-  * Fun idea :)
