@@ -37,13 +37,5 @@ See here: https://mgphx.me/MIDIphonix
 ## To-do
 * Playing infinite notes (on/off messages)
   * Maybe not a good idea for 24/7 unattended streams
-* “Performance Mode” functionality
-  * #buildup - Endless Smile trigger 4-bar
-  * This will be tricky, since drum commands are currently tied to Note#s, which are nullified when Performance mode is active (since it uses Note#s for Playlist "pads")...
-* Drum loop messages
-  * #kick1
-  * #snare1
-  * Etc.
-  * Link to Performance Mode loops
 * Replace samples
   * i.e. #snare A, #snare B, etc.
