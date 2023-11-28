@@ -19,34 +19,55 @@ exports.noteToMidi = function(name) {
   let octave = 0;
   let letter = undefined;
 
+  if (name.length == 1 && (noteNamesSharp.includes(name))) {
+
+    octave = 5;
+    letter = noteNamesSharp.indexOf(name);
+
+  }
+
   // Parse 2-char format
-  if (name.length == 2 && isNaN(name[1]) == false) {
-
-    letter = name[0];
-
-    // Check if note letter is valid
-    if (noteNamesSharp.includes(letter)) {
-
-    // Set 'letter' to index value from notes array
-      letter = noteNamesSharp.indexOf(letter);
-    }
-
-    // If note letter is invalid (h, x, etc.), return -1
-    else {
-      return -1;
-    }
-
-    // Turn number into octave
-    octave = name[1];
+  else if (name.length == 2) {
     
-    // If octave out of bounds, return -2
-    if (octave > 8) {
-      return -2;
+    if (!isNaN(name[1])) {
+
+      letter = name[0];
+
+      // Check if note letter is valid
+      if (noteNamesSharp.includes(letter)) {
+
+      // Set 'letter' to index value from notes array
+        letter = noteNamesSharp.indexOf(letter);
+      }
+
+      // If note letter is invalid (h, x, etc.), return -1
+      else {
+        return -1;
+      }
+
+      // Turn number into octave
+      octave = name[1];
+      
+      // If octave out of bounds, return -2
+      if (octave > 8) {
+        return -2;
+      }
+
     }
 
-    // Calculate and return finalNum
-    finalNum = letter + (12 * octave) + 12;
-    return finalNum;
+    else {
+
+      octave = 5;
+
+      // Check if it's sharp (#) or flat (b)
+      if (noteNamesSharp.includes(name)) {
+        letter = noteNamesSharp.indexOf(name);
+      }
+      else if (noteNamesFlat.includes(name)) {
+        letter = noteNamesFlat.indexOf(name);
+      }
+
+    }
 
   }
 
@@ -73,13 +94,14 @@ exports.noteToMidi = function(name) {
       return -2;
     }
 
-    // Calculate and return finalNum
-    finalNum = letter + (12 * octave) + 12;
-    return finalNum;
   }
 
   else {
     return -1;
   }
 
-}
+  // Calculate and return finalNum
+  finalNum = letter + (12 * octave) + 12;
+  return finalNum;
+
+};

@@ -22,7 +22,7 @@ function sleep(ms) {
 exports.knobHandler = async function(commandName, knobState, paramsNum,
     client, target, commandValues, context, output, currentTempo, tempoCooldownManager) {
 
-    if (commandName === 'key') {
+    if (commandName === 'key' || commandName === 'pitch') {
 
         if (commandValues[0] === undefined || isNaN(Number(commandValues[0]))) {
 
@@ -35,6 +35,21 @@ exports.knobHandler = async function(commandName, knobState, paramsNum,
             var semitones = Number(commandValues[0]);
             var scaledSemitones = Math.round((semitones + 12) / 0.188976378);
             output.sendMessage([controlChange, paramsNum, scaledSemitones]);
+
+            const knobValue = parseInt(commandValues[0], 10);
+            const knobId = paramsNum; // Use paramsNum as a unique identifier for each knob
+
+            // Initialize the last known value for the knob if it doesn't exist
+            if (!knobState[knobId]) {
+
+              knobState[knobId] = { lastKnownValue: 0, isTransitioning: false, transitionTime: 0 };
+
+            }
+
+            // Update the last known value for the knob
+            knobState[knobId].lastKnownValue = semitones;
+
+            return knobState[knobId];
 
         }
 
@@ -84,7 +99,7 @@ exports.knobHandler = async function(commandName, knobState, paramsNum,
 
         if (transitionTime > 30000) {
 
-          client.say(target, 'Please choose a duration between 1-30 seconds');
+          client.say(target, 'Please choose a duration between 1-30 seconds. Format: #[command] [value %] [seconds]');
 
         }
 

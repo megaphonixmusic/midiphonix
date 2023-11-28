@@ -18,6 +18,7 @@ const tempoHandler = require('./tempoHandler.js').tempoHandler;
 
 const tmi = require('tmi.js');
 const midi = require('midi');
+const fs = require('fs');
 
 // Collect and sort channels into mute groups by flag (from params.js)
 for (let i = 0; i < params.length; i++) {
@@ -35,6 +36,7 @@ for (let i = 0; i < params.length; i++) {
 
 // Import the CooldownManager class
 const CooldownManager = require('./cooldownManager');
+const { request } = require('http');
 // Create a tempoCooldownManager instance with a 20-second cooldown (and clear it immediately)
 const tempoCooldownManager = new CooldownManager(20000);
 tempoCooldownManager.lastExecutionTime = 20001;
@@ -81,7 +83,7 @@ output.sendMessage([controlChange, params[4][2], 40]);
 var currentTempo = 120;
 
 // Initialize Performance Mode
-var isPerfModeEnabled = false;
+var isPerfModeEnabled = true;
 
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
@@ -103,6 +105,9 @@ var validNames = [];
 for (let i = 0; i < params.length; i++) {
   validNames.push(params[i][0]);
 }
+for (let i = 0; i < perfModeOrder.length; i++) {
+  validNames.push(perfModeOrder[i]);
+}
 validNames = validNames.flat();
 
 // Make them printable in chat
@@ -118,7 +123,16 @@ for (let i = 0; i < params.length; i++) {
     validSeqNames.push(params[i][0]);
   }
 }
-console.log(`validSeqNames: ${validSeqNames}`);
+
+// Handle vowel parameter pairings (X,Y) by MIDI value
+const vowelNums = [
+  [118, 71], // A
+  [35, 115], // E
+  [8, 121], // I
+  [28, 9], // O
+  [9, 7] // U
+];
+const vowels = ['a', 'e', 'i', 'o', 'u'];
 
 
 
@@ -191,12 +205,15 @@ async function onMessageHandler (target, context, msg, self) {
         if (commandValues[0] === 'on') {
 
           isPerfModeEnabled = true;
+          client.say(target, 'Performance Mode ENABLED');
 
         }
 
         else if (commandValues[0] === 'off') {
 
           isPerfModeEnabled = false;
+          client.say(target, 'Performance Mode DISABLED');
+
 
         }
 
@@ -336,13 +353,30 @@ async function onMessageHandler (target, context, msg, self) {
 
                     if (listOfKnobs[i][0] === params[paramsIndex][2].toString()) {
 
-                    requestedValue = Math.round((listOfKnobs[i][1].lastKnownValue / 127) * 100);
+                      if (commandName === '?key' || commandName === '?pitch') {
+
+                        requestedValue = listOfKnobs[i][1].lastKnownValue;
+                        
+                        if (requestedValue > 0) {
+
+                          requestedValue = '+' + requestedValue;
+
+                        }
+                        
+                        client.say(target, `Current ${params[paramsIndex][0][0]} value: ${requestedValue}`);
+
+                      }
+                      
+                      else {
+
+                        requestedValue = Math.round((listOfKnobs[i][1].lastKnownValue / 127) * 100);
+                        client.say(target, `Current ${params[paramsIndex][0][0]} value: ${requestedValue}`);
+
+                      }
 
                     }
 
                 }
-
-                client.say(target, `Current ${params[paramsIndex][0]} value: ${requestedValue}`);
 
             }  
 
@@ -375,6 +409,8 @@ async function onMessageHandler (target, context, msg, self) {
             }
 
           }
+          // console.log(knobState);
+          fs.writeFile('knobState.txt', JSON.stringify(knobState), (err) => { if (err) throw err});
 
         }
 
@@ -388,77 +424,164 @@ async function onMessageHandler (target, context, msg, self) {
         
       }
 
-      else {
+      else if (commandName === 'vocal') {
 
-        if (isPerfModeEnabled && perfModeOrder.includes(commandName)) {
+        if (commandValues.length > 1) {
 
-          var perfModeReturn = perfMode(commandName, commandValues);
-          
-          if (perfModeReturn == undefined) {
+          client.say(target, 'Invalid format. Try: #vocal aeiou');
 
-            client.say(target, `Invalid value. Please select a pattern #1-4 or 'stop'`);
-
-          } 
-        
-          else {
-
-            output.sendMessage([noteOn+14,perfModeReturn,127]);
-            output.sendMessage([noteOff+14,perfModeReturn,127]);
-
-          }
-        
         }
 
-        else if (paramsType === 'oneshot') {
+        else {
 
-            output.sendMessage([noteOn+15,paramsNum,127]);
-            output.sendMessage([noteOff+15,paramsNum,127]);
+          var letters = commandValues[0];
+          var vocalXCCNum = params[params.indexOf(params.find(arr => arr.flat().includes('vocalX')))][2];
+          var vocalYCCNum = params[params.indexOf(params.find(arr => arr.flat().includes('vocalY')))][2];
+          var stepDuration = (1 / (currentTempo * 2)) * 60000
+          var abort = false;
 
-          }
+          for (let i = 0; i < letters.length; i++) {
 
-        else if (paramsType === 'instrument') {
+            for (let i = 0; i < letters.length; i++) {
 
-            instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
-
-          }
-
-        else if (paramsType === 'seq') {
-
-          /* if (isPerfModeEnabled) {
-
-            client.say(target, 'Command unavailable - performance mode enabled')
-
-          } 
-
-          else { }*/
-
-            var isSeq = true;
-
-            if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
-              
-              client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`);
-              console.log(`* Invalid instrument name: ${commandValues[0]}`);
+              if (!vowels.includes(letters[i])) {
+                
+                abort = true;
+                client.say(target, 'Invalid letters. Only use vowels a-e-i-o-u.')
+                break;
+  
+              }
 
             }
 
-            else if (!validSeqNames.includes(commandValues[0])) {
+            if (!abort) {
+            
+              var vocalCCNums = vowelNums[vowels.indexOf(letters[i])];
 
-              client.say(target, `Sequencing "${commandValues[0]}" not supported. Try another instrument (e.g. piano)`);
-              console.log(`* Sequencing ${commandValues[0]} not supported`);
+              output.sendMessage([controlChange,vocalXCCNum,vocalCCNums[0]]);
+              output.sendMessage([controlChange,vocalYCCNum,vocalCCNums[1]]);
+              
+              output.sendMessage([noteOn+params[paramsIndex][2],36,127]);
+
+              await sleep(stepDuration);
+
+              output.sendMessage([noteOff+params[paramsIndex][2],36,127]);
 
             }
 
             else {
+              break;
+            }
 
-              paramsIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
-              paramsNum = params[paramsIndex][2];
+          }
+
+        }
+
+      }
+
+      else {
+
+        if (isPerfModeEnabled && perfModeOrder.includes(commandName)) {
+
+          if (commandName === 'buildup' || commandName === 'fx') {
+
+            output.sendMessage([noteOn+14,126,127]);
+            output.sendMessage([noteOn+14,60,127]);
+            output.sendMessage([noteOff+14,60,127]);
+            output.sendMessage([noteOff+14,126,127]);
+
+
+          }
+
+          else {
+
+            var commandIndex = perfModeOrder.indexOf(commandName);
+            if (commandIndex > 9) {
+              var numberOfScrolls = commandIndex - 9;
+              commandIndex = 9;
+            }
+            var perfModeReturn = perfMode(commandName, commandIndex, commandValues);
+            
+            if (perfModeReturn == undefined) {
+
+              client.say(target, `Invalid value. Please select a pattern #1-4 or 'stop'`);
+
+            }
+          
+            else {
+
+              if (numberOfScrolls != undefined) {
+                for (let i = 0; i < numberOfScrolls; i++) {
+                  output.sendMessage([noteOn+14,121,127]);
+                  output.sendMessage([noteOff+14,121,127]);
+                }
+              }
+              
+              output.sendMessage([noteOn+14,perfModeReturn,127]);
+              output.sendMessage([noteOff+14,perfModeReturn,127]);
+
+              if (numberOfScrolls != undefined) {
+                for (let i = 0; i < numberOfScrolls; i++) {
+                  output.sendMessage([noteOn+14,120,127]);
+                  output.sendMessage([noteOff+14,120,127]);
+                }
+              }
+
+            }
+          
+          }
+        }
+
+          else if (paramsType === 'oneshot') {
+
+              output.sendMessage([noteOn+15,paramsNum,127]);
+              output.sendMessage([noteOff+15,paramsNum,127]);
+
+            }
+
+          else if (paramsType === 'instrument') {
 
               instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
 
+            }
+
+          else if (paramsType === 'seq') {
+
+            /* if (isPerfModeEnabled) {
+
+              client.say(target, 'Command unavailable - performance mode enabled')
+
+            } 
+
+            else { }*/
+
+              var isSeq = true;
+
+              if (!validNames.includes(commandValues[0]) || commandValues.length < 2) {
+                
+                client.say(target, `Invalid format. Try: #seq [instrumentname] [notes ...]`);
+                console.log(`* Invalid instrument name: ${commandValues[0]}`);
+
+              }
+
+              else if (!validSeqNames.includes(commandValues[0])) {
+
+                client.say(target, `Sequencing "${commandValues[0]}" not supported. Try another instrument (e.g. piano)`);
+                console.log(`* Sequencing ${commandValues[0]} not supported`);
+
+              }
+
+              else {
+
+                paramsIndex = params.indexOf(params.find(arr => arr.includes(commandValues[0])));
+                paramsNum = params[paramsIndex][2];
+
+                instrumentHandler(commandValues, paramsNum, output, client, target, isSeq, currentTempo);
+
+              }
             }
           }
         }
       }
     }
-  }
-};
+  };

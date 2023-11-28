@@ -44,6 +44,7 @@ exports.instrumentHandler = async function(commandValues, paramsNum, output, cli
   }
   
   else {
+
     var noteDuration = 1;
 
     if (commandValues.length > 0 && !isNaN(Number(commandValues.slice(-1)))) {
@@ -52,44 +53,41 @@ exports.instrumentHandler = async function(commandValues, paramsNum, output, cli
 
     }
 
-    else {
+    if (isSeq) {
 
-      if (isSeq) {
+      var noteLength = (1 / (currentTempo * 2)) * 60000;
 
-        var noteLength = (1 / (currentTempo * 2)) * 60000;
+      for (let i = 0; i < noteNums.length; i++) {
 
-        for (let i = 0; i < noteNums.length; i++) {
-
-          output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
-          await sleep(noteLength);
-          output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
-
-        }
+        output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
+        await sleep(noteLength);
+        output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
 
       }
 
-      else {
+    }
 
-        if (noteNums.length == 0) {
+    else {
 
-          noteNums.push(middleC);
+      if (noteNums.length == 0) {
 
-        }
+        noteNums.push(middleC);
 
-        for (let i = 0; i < noteNums.length; i++) {
+      }
 
-          output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
+      for (let i = 0; i < noteNums.length; i++) {
 
-        }
+        output.sendMessage([noteOn+paramsNum,noteNums[i],127]);
 
-        await sleep(noteDuration * 1000);
+      }
+
+      await sleep(noteDuration * 1000);
 
 
-        for (let i = 0; i < noteNums.length; i++) {
+      for (let i = 0; i < noteNums.length; i++) {
 
-          output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
+        output.sendMessage([noteOff+paramsNum,noteNums[i],127]);
 
-        }
       }
     }
   }
