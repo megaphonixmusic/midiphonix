@@ -1,1 +1,7 @@
-{"20":{"lastKnownValue":0,"isTransitioning":false,"transitionTime":10000,"startTime":1701070725311},"35":{"lastKnownValue":0,"isTransitioning":false,"transitionTime":0}}
+[
+ "filter: 100%",
+ "reverb: 0%",
+ "delay: 0%",
+ "phaser: 0%",
+ "pitch: -1%"
+]

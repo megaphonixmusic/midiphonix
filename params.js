@@ -32,6 +32,7 @@ exports.params = [
     ['arp',            'instrument',     5,         34, 'instruments'],
     ['vocal',          'instrument',     6],
     ['help',           'help',           0],
+    ['midiphonix',     'help',           0],
     ['mute',           'mute',           0],
     ['unmute',         'unmute',         0],
     ['play',           'play',         251],
@@ -62,11 +63,12 @@ exports.perfModeOrder = [
     'crash',
     'shaker',
     'perc',
+    'buildup',
+    null,
     'bass',
     'pad',
     'lead',
     'arp',
     'texture',
-    'buildup'
 
 ];

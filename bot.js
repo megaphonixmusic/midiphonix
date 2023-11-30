@@ -44,6 +44,7 @@ tempoCooldownManager.lastExecutionTime = 20001;
 const fxCooldownManager = new CooldownManager(2000); // 2 seconds cooldown
 // Initialize an object to store the last known knob values
 const knobState = {};
+var displayKnobValuesText = [];
 
 // Define commonly used MIDI codes
 const middleC = 60;
@@ -169,7 +170,7 @@ async function onMessageHandler (target, context, msg, self) {
       var paramsIndex = params.indexOf(params.find(arr => arr.flat().includes(commandName)));
       
       // Help command
-      if (commandName === 'help') {
+      if (commandName === 'help' || commandName === 'midiphonix') {
         client.say(target, 'MIDIphonix Guide can be found here: https://mgphx.me/MIDIphonix')
         console.log(`* Executed ${commandName} command`);
       }
@@ -335,6 +336,8 @@ async function onMessageHandler (target, context, msg, self) {
 
         else if (paramsType === 'knob') {
 
+          var listOfKnobs = Object.entries(knobState);
+
           // If message is a query ('#?[command]'), retrieve knob value and post in chat
           if (commandName[0] === '?') {
 
@@ -347,7 +350,6 @@ async function onMessageHandler (target, context, msg, self) {
             else {
 
                 var requestedValue = null;
-                var listOfKnobs = Object.entries(knobState);
 
                 for (let i = 0; i < listOfKnobs.length; i++) {
 
@@ -409,8 +411,23 @@ async function onMessageHandler (target, context, msg, self) {
             }
 
           }
-          // console.log(knobState);
-          fs.writeFile('knobState.txt', JSON.stringify(knobState), (err) => { if (err) throw err});
+          // console.log(Object.entries(knobState)[0][1].lastKnownValue);
+
+          var knobStateLength = Object.keys(knobState).length;
+
+          for (let i = 0; i < knobStateLength; i++) {
+            let knobNum = Object.entries(knobState)[i][0];
+            let knobVal = Math.round((Object.entries(knobState)[i][1].lastKnownValue / 127) * 100);
+            let knobName = null;
+            for (let j = 0; j < params.length; j++) {
+              if (knobNum == params[j][2]) {
+                knobName = params[j][0][0];
+              }
+            }
+            displayKnobValuesText[i] = `${knobName}: ${knobVal}%`;
+          }
+          
+          fs.writeFile('knobState.txt', JSON.stringify(displayKnobValuesText, null, ' '), (err) => { if (err) throw err});
 
         }
 
@@ -485,10 +502,10 @@ async function onMessageHandler (target, context, msg, self) {
 
           if (commandName === 'buildup' || commandName === 'fx') {
 
-            output.sendMessage([noteOn+14,126,127]);
-            output.sendMessage([noteOn+14,60,127]);
-            output.sendMessage([noteOff+14,60,127]);
-            output.sendMessage([noteOff+14,126,127]);
+            output.sendMessage([noteOn+14,125,127]);
+            output.sendMessage([noteOn+14,96,127]);
+            output.sendMessage([noteOff+14,96,127]);
+            output.sendMessage([noteOff+14,125,127]);
 
 
           }
