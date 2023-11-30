@@ -35,6 +35,10 @@ See *[Available commands](#Available-commands)* below and try it out on https://
 See here: https://mgphx.me/MIDIphonix
 
 ## To-do
+* Create a periodic reminder to enable Low Latency in video player
+* Stackable commands?
+  * i.e. "#kick #snare #hihat"
+  * This will be challenging
 * Playing infinite notes (on/off messages)
   * Maybe not a good idea for 24/7 unattended streams
 * Replace samples
