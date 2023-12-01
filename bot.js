@@ -76,7 +76,7 @@ const client = new tmi.client(opts);
 client.on('message', onMessageHandler);
 client.on('connected', onConnectedHandler);
 
-// Connect to Twitch:
+// Connect to Twitch and say hi:
 client.connect();
 
 // Initialize tempo to 120 BPM (-80 = 40cc#)
@@ -503,8 +503,8 @@ async function onMessageHandler (target, context, msg, self) {
           if (commandName === 'buildup' || commandName === 'fx') {
 
             output.sendMessage([noteOn+14,125,127]);
-            output.sendMessage([noteOn+14,96,127]);
-            output.sendMessage([noteOff+14,96,127]);
+            output.sendMessage([noteOn+14,108,127]);
+            output.sendMessage([noteOff+14,108,127]);
             output.sendMessage([noteOff+14,125,127]);
 
 

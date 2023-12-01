@@ -13,6 +13,7 @@ exports.params = [
     [['pitch','?pitch'],            'knob',         35],
     ['vocalX',                      'knob',         36],
     ['vocalY',                      'knob',         37],
+    [['tremolo','?tremolo'],        'knob',         38],
 
     // Name             Type        Note #   Mute Ctrl#     MuteGroup
     ['kick',           'oneshot', 		48,         25,       'drums'],
@@ -47,7 +48,9 @@ exports.params = [
     ['shaker',           'oneshot',        0],
     ['perc',           'oneshot',        0],
     ['texture',           'oneshot',        0],
-    ['buildup',           'oneshot',        0]
+    ['buildup',           'oneshot',        0],
+    ['cymbals',         'oneshot',          0],
+    ['brekabeat',       'oneshot',          0]
 
 ];
 
@@ -60,6 +63,7 @@ exports.perfModeOrder = [
     'hihat',
     'tom',
     'clap',
+    'cymbals',
     'crash',
     'shaker',
     'perc',
@@ -70,5 +74,6 @@ exports.perfModeOrder = [
     'lead',
     'arp',
     'texture',
+    'breakbeat'
 
 ];
