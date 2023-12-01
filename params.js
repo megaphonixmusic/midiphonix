@@ -50,7 +50,7 @@ exports.params = [
     ['texture',           'oneshot',        0],
     ['buildup',           'oneshot',        0],
     ['cymbals',         'oneshot',          0],
-    ['brekabeat',       'oneshot',          0]
+    ['breakbeat',       'oneshot',          0]
 
 ];
 

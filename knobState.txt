@@ -3,6 +3,6 @@
  "reverb: 0%",
  "delay: 0%",
  "phaser: 0%",
- "pitch: 6%",
+ "pitch: -1%",
  "tremolo: 100%"
 ]
