@@ -4,6 +4,8 @@
   "description": "Twitch chatbot that turns messages into MIDI commands",
   "main": "bot.js",
   "dependencies": {
+    "fs": "^0.0.1-security",
+    "midi": "^2.0.0",
     "node-fetch": "^2.7.0",
     "tmi.js": "^1.8.5",
     "tr46": "^0.0.3",
@@ -11,7 +13,6 @@
     "whatwg-url": "^5.0.0",
     "ws": "^8.14.2"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

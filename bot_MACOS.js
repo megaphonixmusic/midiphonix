@@ -35,7 +35,7 @@ for (let i = 0; i < params.length; i++) {
 }
 
 // Import the CooldownManager class
-const CooldownManager = require('./cooldownManager');
+const CooldownManager = require('./cooldownManager.js');
 const { request } = require('http');
 // Create a tempoCooldownManager instance with a 20-second cooldown (and clear it immediately)
 const tempoCooldownManager = new CooldownManager(20000);
@@ -60,12 +60,14 @@ const output = new midi.Output();
 const transOut = new midi.Output();
 const devices = [];
 // Open loopMIDI Port
+// macOS NOTE: THIS USES IAC DRIVER - See README for macOS-specific setup
 const portCount = output.getPortCount();
 for (let i=0;i<portCount;i++) {
   devices.push(output.getPortName(i));
 }
-const loopPort = devices.indexOf('loopMIDI Port');
-const transportOutputPort = devices.indexOf('transportControls');
+// console.log(devices);
+const loopPort = devices.indexOf('IAC Driver loopMIDI Port');
+const transportOutputPort = devices.indexOf('IAC Driver transportControls');
 output.openPort(loopPort);
 transOut.openPort(transportOutputPort);
 
@@ -89,6 +91,8 @@ var isPerfModeEnabled = true;
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
+  client.say(opts.channels[0], 'Wokege');
+  console.log('Sent startup chat message');
 }
 
 function sleep(ms) {
@@ -106,9 +110,11 @@ var validNames = [];
 for (let i = 0; i < params.length; i++) {
   validNames.push(params[i][0]);
 }
-for (let i = 0; i < perfModeOrder.length; i++) {
+// I don't think the below code is necessary? Add back if it breaks things I guess
+/* for (let i = 0; i < perfModeOrder.length; i++) {
   validNames.push(perfModeOrder[i]);
 }
+*/
 validNames = validNames.flat();
 
 // Make them printable in chat
